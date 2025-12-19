@@ -1,8 +1,8 @@
 import { auth } from "@/app/libs/auth";
 import React from "react";
 import LogoutButton from "./LogoutButton";
-import FullscreenButton from "./FullscreenButton";
 import Link from "next/link";
+import FullscreenButton from "./FullScreenButton";
 
 const Navbar = async () => {
   const session = await auth();
