@@ -1,0 +1,30 @@
+{
+  "name": "qa_report_app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.1",
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.8.0",
+    "lucide-react": "^0.561.0",
+    "next": "15.5.9",
+    "next-auth": "^5.0.0-beta.30",
+    "next-cloudinary": "^6.17.5",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.9",
+    "prisma": "^6.19.1",
+    "tailwindcss": "^4"
+  }
+}

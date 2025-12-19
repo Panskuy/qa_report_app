@@ -1,0 +1,144 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String  @map("user_id")
+  type               String
+  provider           String
+  providerAccountId  String  @map("provider_account_id")
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+ 
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@map("sessions")
+}
+ 
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  password      String
+  role          String    @default("USER")
+
+  accounts      Account[]
+  sessions      Session[]
+
+  reports       Report[]  @relation("UserReports")
+  assignedReports Report[] @relation("AssignedReports") // TAMBAH INI
+
+  @@map("users")
+}
+
+ 
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Application {
+  id            String   @id @default(uuid())
+  namaAplikasi  String
+  deskripsi     String?
+
+  teams         Team[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Team {
+  id            String   @id @default(uuid())
+  namaTim       String
+
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  reports       Report[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Report {
+  id          String   @id @default(uuid())
+  judul       String
+  jenis       ReportType
+  severity    SeverityLevel
+  status      ReportStatus 
+  status_pengerjaan String @default("Not Started")
+  approval_status String @default("Pending")
+
+  deskripsi   String?
+  Perbaikan   String?
+  tanggal_perbaikan DateTime?
+  image String[] @default([])
+
+  createdById String?
+  createdBy   User? @relation("UserReports",fields: [createdById],references: [id],onDelete: SetNull)
+
+  // Field untuk PIC
+  assignedToId String?
+  assignedTo   User? @relation("AssignedReports", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  teamId      String
+  team        Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+enum ReportType {
+  Bug
+  TestCase
+}
+
+enum SeverityLevel {
+  Low
+  Medium
+  High
+  Critical
+}
+
+enum ReportStatus {
+  Open
+  InProgress
+  Closed
+}
