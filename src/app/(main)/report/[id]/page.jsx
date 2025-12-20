@@ -9,6 +9,7 @@ import {
   ButtonUpdateStatus,
 } from "./Buttons";
 import CatatanPerbaikan from "./CatatanPerbaikan";
+import KomponenTanggal from "../../../../components/KomponenTanggal";
 
 const statusStyle = (status) => {
   switch (status) {
@@ -173,14 +174,12 @@ const page = async ({ params }) => {
 
         {/* RIGHT – SIDE INFO */}
         <div className="space-y-6">
-          {/* PIC Section - Combined Creator & Assigned */}
           <section className="bg-white border border-slate-200 rounded-lg p-6">
             <h2 className="text-sm font-semibold text-slate-800 mb-4 uppercase">
               Person In Charge
             </h2>
 
             <div className="space-y-4">
-              {/* Creator / Pembuat */}
               <div>
                 <p className="text-xs text-slate-500 mb-2 font-medium">
                   Dibuat Oleh
@@ -216,10 +215,7 @@ const page = async ({ params }) => {
                 )}
               </div>
 
-              {/* Divider */}
               <div className="border-t border-slate-200"></div>
-
-              {/* Assigned To / PIC DEV */}
               <div>
                 <p className="text-xs text-slate-500 mb-2 font-medium">DEV</p>
 
@@ -268,7 +264,6 @@ const page = async ({ params }) => {
                     )}
                   </>
                 ) : (
-                  // Bukan DEV - tampilkan info PIC saja
                   <>
                     {report.assignedTo ? (
                       <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
@@ -301,16 +296,8 @@ const page = async ({ params }) => {
                 )}
               </div>
 
-              {/* Timestamp */}
               <div className="text-xs text-slate-500 pt-2 border-t border-slate-200">
-                Dibuat:{" "}
-                {new Date(report.createdAt).toLocaleDateString("id-ID", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                Dibuat: <KomponenTanggal value={report.createdAt} />
               </div>
             </div>
           </section>
@@ -348,12 +335,21 @@ const page = async ({ params }) => {
                         )}
                       </div>
                     )}
-                    <p className="text-xs text-slate-500">
-                      Anda dapat mengubah status pengerjaan
-                    </p>
+
+                    {report.tanggal_approval_qa !== null ? (
+                      <div className="text-xs text-slate-500 pt-2 border-t border-slate-200">
+                        <p className="">
+                          Di Approv pada tanggal:{" "}
+                          <KomponenTanggal value={report.tanggal_approval_qa} />
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-500">
+                        Anda dapat mengubah status pengerjaan
+                      </p>
+                    )}
                   </div>
                 ) : (
-                  // Bukan PIC - read only
                   <div className="space-y-2">
                     <div className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-md text-sm text-slate-700">
                       {report.status}

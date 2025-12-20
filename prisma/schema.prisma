@@ -57,7 +57,7 @@ model User {
   sessions      Session[]
 
   reports       Report[]  @relation("UserReports")
-  assignedReports Report[] @relation("AssignedReports") // TAMBAH INI
+  assignedReports Report[] @relation("AssignedReports")
 
   @@map("users")
 }
@@ -105,6 +105,7 @@ model Report {
   status      ReportStatus 
   status_pengerjaan String @default("Not Started")
   approval_status String @default("Pending")
+  tanggal_approval_qa DateTime?
   catatan_qa String?
 
   deskripsi   String?
@@ -114,8 +115,6 @@ model Report {
 
   createdById String?
   createdBy   User? @relation("UserReports",fields: [createdById],references: [id],onDelete: SetNull)
-
-  // Field untuk PIC
   assignedToId String?
   assignedTo   User? @relation("AssignedReports", fields: [assignedToId], references: [id], onDelete: SetNull)
 

@@ -6,6 +6,7 @@ import {
   assignPICToReport,
   updateReportStatus,
 } from "./action";
+import toast from "react-hot-toast";
 
 export const ButtonUpdateStatus = ({ status, reportId }) => {
   const [currentStatus, setCurrentStatus] = useState(status);
@@ -60,11 +61,9 @@ export const ButtonUpdateStatus = ({ status, reportId }) => {
         setCurrentStatus(newStatus);
         setIsOpen(false);
       } else {
-        console.error("Failed to update status:", result.error);
-        alert("Gagal update status: " + result.error);
+        toast.error(result.error);
       }
     } catch (error) {
-      console.error("Error:", error);
       alert("Terjadi kesalahan saat update status");
     } finally {
       setIsLoading(false);
@@ -175,9 +174,11 @@ export const ButtonAssignPIC = ({ reportId, currentPIC }) => {
 
     try {
       setIsLoading(true);
-      await assignPICToReport(reportId, currentPIC);
-      // kalau mau refresh data:
-      window.location.reload();
+      const result = await assignPICToReport(reportId, currentPIC);
+
+      if (!result.success) {
+        toast.error(result.error);
+      }
     } catch (error) {
       console.error(error);
       alert("Gagal mengambil PIC");
