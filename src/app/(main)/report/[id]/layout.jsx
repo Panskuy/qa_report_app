@@ -43,17 +43,13 @@ const layout = async ({ children, params }) => {
 
   return (
     <div className="flex  overflow-hidden gap-2">
-      <aside className="w-50   overflow-y-auto h-fit space-y-4">
+      <aside className="w-50   overflow-y-auto h-fit space-y-4 sticky">
         <ListTeam listTeam={report.team?.application} />
         <ListNewError reports={report.team?.reports} />
       </aside>
-      <main className="flex-1 p-8 bg-white mt-2 rounded-lg border border-black/10">
+      <main className="flex-1 p-8 bg-white rounded-lg border border-black/10">
         {children}
       </main>
-
-      <aside className="w-50 bg-white overflow-y-auto h-fit">
-        <Chat />
-      </aside>
     </div>
   );
 };

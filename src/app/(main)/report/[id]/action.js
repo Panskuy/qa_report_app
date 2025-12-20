@@ -87,7 +87,7 @@ export async function updateCatatanPerbaikan(reportId, catatan) {
   }
 }
 
-export async function approveReportByQA(reportId, newApprovalStatus) {
+export async function approveReportByQA(reportId, newApprovalStatus, catatan) {
   try {
     if (newApprovalStatus === "Approved") {
       const updatedReport = await prisma.report.update({
@@ -95,8 +95,9 @@ export async function approveReportByQA(reportId, newApprovalStatus) {
           id: reportId,
         },
         data: {
-          approval_status: "Approved", // Update jadi Approved
-          status: "Closed", // Contoh, juga update status jadi Closed
+          approval_status: "Approved",
+          status: "Closed",
+          catatan_qa: catatan,
         },
       });
 

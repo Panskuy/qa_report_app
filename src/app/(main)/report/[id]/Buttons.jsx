@@ -168,15 +168,58 @@ export const ButtonUpdateStatus = ({ status, reportId }) => {
 };
 
 export const ButtonAssignPIC = ({ reportId, currentPIC }) => {
-  const handleSubmit = async (e) => {
-    const result = await assignPICToReport(reportId, currentPIC);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    if (isLoading) return;
+
+    try {
+      setIsLoading(true);
+      await assignPICToReport(reportId, currentPIC);
+      // kalau mau refresh data:
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+      alert("Gagal mengambil PIC");
+    } finally {
+      setIsLoading(false);
+    }
   };
+
   return (
     <button
       onClick={handleSubmit}
-      className="px-2 py-1 text-sm border border-blue-600 bg-white rounded-lg font-semibold text-blue-600 hover:bg-blue-600 hover:text-white transition-all"
+      disabled={isLoading}
+      className={`
+        px-3 py-1.5 text-sm font-semibold rounded-lg
+        border border-blue-600
+        transition-all flex items-center gap-2
+        ${
+          isLoading
+            ? "bg-blue-600 text-white cursor-not-allowed"
+            : "bg-white text-blue-600 hover:bg-blue-600 hover:text-white"
+        }
+      `}
     >
-      Ambil
+      {isLoading && (
+        <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+          />
+        </svg>
+      )}
+
+      {isLoading ? "Mengambil..." : "Ambil"}
     </button>
   );
 };
@@ -184,12 +227,13 @@ export const ButtonAssignPIC = ({ reportId, currentPIC }) => {
 export const ButtonApproveQA = ({ reportId, currentStatus }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [catatan, setCatatan] = useState("");
 
   const handleAction = async (type) => {
     setIsLoading(true);
 
     try {
-      const result = await approveReportByQA(reportId, type);
+      const result = await approveReportByQA(reportId, type, catatan);
 
       if (result.success) {
         window.location.reload();
@@ -268,6 +312,14 @@ export const ButtonApproveQA = ({ reportId, currentStatus }) => {
                 {isLoading ? "Processing..." : "Kembalikan ke PIC"}
               </button>
             </div>
+
+            <textarea
+              type="text"
+              placeholder="Masukan catatan"
+              value={catatan}
+              onChange={(e) => setCatatan(e.target.value)}
+              className="w-full min-h-30 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1 resize-none"
+            />
 
             <button
               onClick={() => setIsOpen(false)}

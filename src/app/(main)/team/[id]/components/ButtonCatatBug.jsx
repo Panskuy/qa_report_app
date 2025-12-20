@@ -7,6 +7,7 @@ const ButtonCatatBug = ({ idTeam, idApplication }) => {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [preview, setPreview] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const openModal = () => {
     setMounted(true);
@@ -14,6 +15,7 @@ const ButtonCatatBug = ({ idTeam, idApplication }) => {
   };
 
   const closeModal = () => {
+    if (isLoading) return; // ❗ cegah close saat loading
     setOpen(false);
     setTimeout(() => {
       setMounted(false);
@@ -68,8 +70,13 @@ const ButtonCatatBug = ({ idTeam, idApplication }) => {
             {/* FORM */}
             <form
               action={async (formData) => {
-                await createBugReport(formData);
-                closeModal();
+                try {
+                  setIsLoading(true);
+                  await createBugReport(formData);
+                  closeModal();
+                } finally {
+                  setIsLoading(false);
+                }
               }}
               className="px-6 py-5 space-y-4"
             >
@@ -85,132 +92,80 @@ const ButtonCatatBug = ({ idTeam, idApplication }) => {
                 <input
                   name="judul"
                   required
+                  disabled={isLoading}
                   placeholder="Contoh: Error saat submit form login"
-                  className="
-                    w-full border border-slate-300 rounded-md
-                    px-3 py-2 text-sm
-                    focus:outline-none focus:ring-2
-                    focus:ring-slate-800/20
-                  "
+                  className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm"
                 />
               </div>
 
               {/* JENIS & SEVERITY */}
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Jenis
-                  </label>
-                  <select
-                    name="jenis"
-                    className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm"
-                  >
-                    <option value="Bug">Bug</option>
-                    <option value="UI">UI</option>
-                    <option value="Performance">Performance</option>
-                  </select>
-                </div>
+                <select
+                  name="jenis"
+                  disabled={isLoading}
+                  className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm"
+                >
+                  <option value="Bug">Bug</option>
+                  <option value="UI">UI</option>
+                  <option value="Performance">Performance</option>
+                </select>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Severity
-                  </label>
-                  <select
-                    name="severity"
-                    className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm"
-                  >
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                    <option value="Critical">Critical</option>
-                  </select>
-                </div>
+                <select
+                  name="severity"
+                  disabled={isLoading}
+                  className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm"
+                >
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="High">High</option>
+                  <option value="Critical">Critical</option>
+                </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Deskripsi
-                </label>
-
-                <textarea
-                  name="deskripsi"
-                  id="deskripsi"
-                  className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm min-h-40"
-                />
-              </div>
+              {/* DESKRIPSI */}
+              <textarea
+                name="deskripsi"
+                disabled={isLoading}
+                className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm min-h-40"
+              />
 
               {/* UPLOAD IMAGE */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Screenshot / Evidence
-                </label>
-
-                <input
-                  type="file"
-                  name="images"
-                  multiple
-                  accept="image/*"
-                  onChange={(e) => {
-                    const files = Array.from(e.target.files || []);
-                    setPreview(files.map((file) => URL.createObjectURL(file)));
-                  }}
-                  className="
-                    block w-full text-sm text-slate-600
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-md file:border-0
-                    file:text-sm file:font-medium
-                    file:bg-slate-100 file:text-slate-700
-                    hover:file:bg-slate-200 transition
-                  "
-                />
-
-                {/* PREVIEW */}
-                {preview.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2 mt-3">
-                    {preview.map((src, i) => (
-                      <div
-                        key={i}
-                        className="border rounded-md overflow-hidden"
-                      >
-                        <img
-                          src={src}
-                          alt="Preview"
-                          className="h-20 w-full object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <input
+                type="file"
+                name="images"
+                multiple
+                accept="image/*"
+                disabled={isLoading}
+                onChange={(e) => {
+                  const files = Array.from(e.target.files || []);
+                  setPreview(files.map((file) => URL.createObjectURL(file)));
+                }}
+              />
 
               {/* FOOTER */}
               <div className="flex justify-end gap-2 pt-4 border-t">
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="
-                    px-4 py-2 text-sm
-                    border border-slate-300
-                    rounded-md
-                    text-slate-700
-                    hover:bg-slate-100
-                    transition
-                  "
+                  disabled={isLoading}
+                  className="px-4 py-2 text-sm border rounded-md"
                 >
                   Batal
                 </button>
 
                 <button
                   type="submit"
-                  className="
-                    px-4 py-2 text-sm font-medium
-                    bg-slate-800 text-white
-                    rounded-md
-                    hover:bg-slate-900
-                    transition
-                  "
+                  disabled={isLoading}
+                  className={`
+                    px-4 py-2 text-sm font-medium rounded-md text-white
+                    ${
+                      isLoading
+                        ? "bg-slate-400"
+                        : "bg-slate-800 hover:bg-slate-900"
+                    }
+                  `}
                 >
-                  Simpan Laporan
+                  {isLoading ? "Menyimpan..." : "Simpan Laporan"}
                 </button>
               </div>
             </form>

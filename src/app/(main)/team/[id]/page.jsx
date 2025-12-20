@@ -112,7 +112,11 @@ const page = async ({ params }) => {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {closedReports.map((report) => (
-              <ReportCard key={report.id} report={report} />
+              <ReportCard
+                key={report.id}
+                report={report}
+                userId={session?.user?.id}
+              />
             ))}
           </div>
         )}
@@ -125,7 +129,7 @@ const page = async ({ params }) => {
    COMPONENTS
 ===================== */
 
-const ReportCard = ({ report }) => (
+const ReportCard = ({ report, userId }) => (
   <Link
     href={`/report/${report.id}`}
     className="bg-white border border-slate-200 rounded-lg p-5 hover:shadow-md transition"
@@ -133,12 +137,19 @@ const ReportCard = ({ report }) => (
     {/* HEADER */}
     <div className="flex items-start justify-between mb-2">
       <h3 className="font-medium text-slate-800 line-clamp-2">
-        {report.judul}
+        {report.kode} || {report.judul}
       </h3>
 
-      <span className="text-xs text-slate-400 whitespace-nowrap">
-        {report.createdBy?.email ?? "-"}
-      </span>
+      <div className="space-x-2">
+        {report.createdById === userId && (
+          <span className="text-xs text-white whitespace-nowrap bg-blue-600 px-1 py-1 rounded-lg">
+            You
+          </span>
+        )}
+        <span className="text-xs text-slate-400 whitespace-nowrap">
+          {report.createdBy?.email ?? "-"}
+        </span>
+      </div>
     </div>
 
     {/* BADGES */}

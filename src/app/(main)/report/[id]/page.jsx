@@ -28,7 +28,7 @@ const severityStyle = (severity) => {
     case "Critical":
       return "bg-red-600 text-white";
     case "High":
-      return "bg-orange-600 text-white";
+      return "bg-red-600 text-white";
     case "Medium":
       return "bg-yellow-600 text-black";
     case "Low":
@@ -81,6 +81,9 @@ const page = async ({ params }) => {
   // Check apakah current user adalah PIC
   const isAssignedPIC = report.assignedTo?.id === currentUser?.id;
   const isQA = currentUser?.role === "QA";
+
+  const isClosedAndApproved =
+    report.status === "Closed" && report.approval_status === "Approved";
 
   return (
     <div className="mx-auto space-y-8 w-full max-h-240">
@@ -140,16 +143,33 @@ const page = async ({ params }) => {
 
       {/* ================= CONTENT ================= */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full ">
-        {/* LEFT – DESKRIPSI */}
-        <section className="lg:col-span-2 bg-white border border-slate-200 rounded-lg p-6">
-          <h2 className="text-sm font-semibold text-slate-800 mb-3 uppercase">
-            Deskripsi Masalah
-          </h2>
+        <div className="lg:col-span-2 bg-white h-fit space-y-6">
+          <div className="border border-slate-200 rounded-lg p-6">
+            <h2 className="text-sm font-semibold text-slate-800 mb-3 uppercase ">
+              Deskripsi Masalah
+            </h2>
+            <p
+              className={`text-sm text-slate-700 whitespace-pre-line leading-relaxed ${
+                report.catatan_qa !== null ? "min-h-40" : "min-h-160"
+              } max-h-130 overflow-y-auto`}
+            >
+              {report.deskripsi || "Tidak ada deskripsi."}
+            </p>
+          </div>
 
-          <p className="text-sm text-slate-700 whitespace-pre-line leading-relaxed min-h-130 max-h-130 overflow-y-auto">
-            {report.deskripsi || "Tidak ada deskripsi."}
-          </p>
-        </section>
+          {report.catatan_qa && (
+            <div className="border border-slate-200 rounded-lg p-6">
+              <h2 className="text-sm font-semibold text-slate-800 mb-3 uppercase ">
+                Catatan QA
+              </h2>
+              <p
+                className={`text-sm text-slate-700 whitespace-pre-line leading-relaxed max-h-130 overflow-y-auto`}
+              >
+                {report.catatan_qa || "Tidak ada deskripsi."}
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* RIGHT – SIDE INFO */}
         <div className="space-y-6">
@@ -313,10 +333,18 @@ const page = async ({ params }) => {
                         {report.status}
                       </div>
                     ) : (
-                      <ButtonUpdateStatus
-                        status={report.status}
-                        reportId={report.id}
-                      />
+                      <div className="flex items-center gap-4">
+                        <ButtonUpdateStatus
+                          status={report.status}
+                          reportId={report.id}
+                        />
+
+                        <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                          <span className="text-xs font-medium text-yellow-700">
+                            Waiting Approval By QA
+                          </span>
+                        </div>
+                      </div>
                     )}
                     <p className="text-xs text-slate-500">
                       Anda dapat mengubah status pengerjaan
@@ -338,7 +366,7 @@ const page = async ({ params }) => {
               </div>
 
               {/* Right Side - QA Approval */}
-              <div className="flex-shrink-0">
+              <div className="">
                 {report.status === "Closed" &&
                 report.approval_status === "Approved" ? (
                   <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg">
@@ -380,7 +408,11 @@ const page = async ({ params }) => {
               Catatan Perbaikan
             </h2>
 
-            {isAssignedPIC ? (
+            {isClosedAndApproved ? (
+              <p className="text-sm text-slate-700 whitespace-pre-line leading-relaxed">
+                {report.Perbaikan || "Tidak ada catatan perbaikan."}
+              </p>
+            ) : isAssignedPIC ? (
               <CatatanPerbaikan
                 catatan_perbaikan={report.Perbaikan}
                 reportId={report.id}

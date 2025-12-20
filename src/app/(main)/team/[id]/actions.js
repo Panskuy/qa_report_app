@@ -5,6 +5,24 @@ import cloudinary from "@/app/libs/cloudinary";
 import prisma from "@/app/libs/prisma";
 import { revalidatePath } from "next/cache";
 
+async function generateUniqueReportCode(jenis) {
+  let kode = "";
+  let isUnique = false;
+
+  while (!isUnique) {
+    const random = Math.floor(1000 + Math.random() * 9000);
+    kode = `${jenis}-${random}`;
+
+    const exists = await prisma.report.findUnique({
+      where: { kode },
+    });
+
+    if (!exists) isUnique = true;
+  }
+
+  return kode;
+}
+
 export async function createBugReport(formData) {
   try {
     const judul = formData.get("judul");
@@ -16,6 +34,8 @@ export async function createBugReport(formData) {
 
     const session = await auth();
     const userId = session?.user?.id;
+
+    const kode = await generateUniqueReportCode("RPRT");
 
     const imageUrls = [];
 
@@ -38,6 +58,7 @@ export async function createBugReport(formData) {
 
     await prisma.report.create({
       data: {
+        kode, // ✅ SIMPAN KODE REPORT
         judul,
         jenis,
         severity,
@@ -53,10 +74,9 @@ export async function createBugReport(formData) {
       },
     });
 
-    // ✅ INI YANG BIKIN HALAMAN KE-REFRESH
     revalidatePath(`/team/${teamId}`);
 
-    return { success: true };
+    return { success: true, kode };
   } catch (error) {
     console.error("CREATE BUG ERROR:", error);
     throw new Error("Gagal membuat laporan bug");

@@ -98,12 +98,14 @@ model Team {
 
 model Report {
   id          String   @id @default(uuid())
+  kode       String   @unique
   judul       String
   jenis       ReportType
   severity    SeverityLevel
   status      ReportStatus 
   status_pengerjaan String @default("Not Started")
   approval_status String @default("Pending")
+  catatan_qa String?
 
   deskripsi   String?
   Perbaikan   String?

@@ -12,7 +12,7 @@ const layout = async ({ children }) => {
   return (
     <div>
       <Navbar />
-      <div className="max-w-450 mx-auto pt-20">{children}</div>
+      <div className="max-w-450 mx-auto py-17">{children}</div>
     </div>
   );
 };
