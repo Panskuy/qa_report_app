@@ -339,11 +339,13 @@ const page = async ({ params }) => {
                           reportId={report.id}
                         />
 
-                        <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
-                          <span className="text-xs font-medium text-yellow-700">
-                            Waiting Approval By QA
-                          </span>
-                        </div>
+                        {report.status === "Closed" && (
+                          <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <span className="text-xs font-medium text-yellow-700">
+                              Waiting Approval By QA
+                            </span>
+                          </div>
+                        )}
                       </div>
                     )}
                     <p className="text-xs text-slate-500">

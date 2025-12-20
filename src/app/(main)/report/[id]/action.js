@@ -89,56 +89,23 @@ export async function updateCatatanPerbaikan(reportId, catatan) {
 
 export async function approveReportByQA(reportId, newApprovalStatus, catatan) {
   try {
-    if (newApprovalStatus === "Approved") {
-      const updatedReport = await prisma.report.update({
-        where: {
-          id: reportId,
-        },
-        data: {
-          approval_status: "Approved",
-          status: "Closed",
-          catatan_qa: catatan,
-        },
-      });
+    console.log("CATATAN QA:", catatan);
 
-      revalidatePath("/reports");
-      revalidatePath(`/reports/${reportId}`);
+    const updatedReport = await prisma.report.update({
+      where: { id: reportId },
+      data: {
+        approval_status: newApprovalStatus,
+        status: newApprovalStatus === "Approved" ? "Closed" : "Open",
+        catatan_qa: catatan,
+      },
+    });
 
-      return {
-        success: true,
-        data: updatedReport,
-      };
-    }
+    revalidatePath(`/report/${reportId}`);
+    revalidatePath(`/team`);
 
-    if (newApprovalStatus === "Pending") {
-      const updatedReport = await prisma.report.update({
-        where: {
-          id: reportId,
-        },
-        data: {
-          approval_status: "Pending",
-          status: "Open", // Contoh reset status jadi Open
-        },
-      });
-
-      revalidatePath("/reports");
-      revalidatePath(`/reports/${reportId}`);
-
-      return {
-        success: true,
-        data: updatedReport,
-      };
-    }
-
-    return {
-      success: false,
-      error: "Invalid approval status",
-    };
+    return { success: true, data: updatedReport };
   } catch (error) {
     console.error("Error approving report:", error);
-    return {
-      success: false,
-      error: error.message,
-    };
+    return { success: false, error: error.message };
   }
 }
