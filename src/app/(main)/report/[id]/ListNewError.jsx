@@ -1,3 +1,4 @@
+import KomponenTanggal from "@/components/KomponenTanggal";
 import Link from "next/link";
 
 const ListNewError = ({ reports = [] }) => {
@@ -33,7 +34,7 @@ const ListNewError = ({ reports = [] }) => {
 
               <div className="flex items-center justify-between mt-1">
                 <span className="text-xs text-slate-500">
-                  {new Date(report.createdAt).toLocaleDateString("id-ID")}
+                  <KomponenTanggal value={report.createdAt} />
                 </span>
 
                 <span

@@ -1,12 +1,15 @@
 "use client";
 import React, { useState } from "react";
 import { updateCatatanPerbaikan } from "./action";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const CatatanPerbaikan = ({ catatan_perbaikan, reportId }) => {
   const [newCatatan, setNewCatatan] = useState(catatan_perbaikan || "");
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const router = useRouter();
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -19,10 +22,11 @@ const CatatanPerbaikan = ({ catatan_perbaikan, reportId }) => {
         setIsEditing(false);
         setIsSaved(true);
 
-        // Hide success message after 3 seconds
         setTimeout(() => setIsSaved(false), 3000);
+        router.refresh();
       } else {
-        alert("Gagal menyimpan catatan: " + result.error);
+        toast.error(result.error);
+        router.refresh();
       }
     } catch (error) {
       console.error("Error:", error);

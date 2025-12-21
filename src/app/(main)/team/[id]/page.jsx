@@ -2,6 +2,7 @@ import prisma from "@/app/libs/prisma";
 import Link from "next/link";
 import ButtonCatatBug from "./components/ButtonCatatBug";
 import { auth } from "@/app/libs/auth";
+import { notFound } from "next/navigation";
 
 /* =====================
    STATUS STYLE
@@ -16,7 +17,6 @@ const page = async ({ params }) => {
   const { id } = await params;
   const session = await auth();
 
-  /* 🔹 TEAM DETAIL + REPORTS + CREATED BY */
   const detailTeam = await prisma.team.findUnique({
     where: { id },
     include: {
@@ -37,7 +37,7 @@ const page = async ({ params }) => {
   });
 
   if (!detailTeam) {
-    return <div className="p-6">Team tidak ditemukan</div>;
+    return notFound();
   }
 
   /* 🔹 GUNAKAN REPORTS DARI detailTeam */

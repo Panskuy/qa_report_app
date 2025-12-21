@@ -2,6 +2,7 @@ import ListNewError from "./ListNewError";
 import Chat from "./Chat";
 import prisma from "@/app/libs/prisma";
 import ListTeam from "./ListTeam";
+import { notFound } from "next/navigation";
 
 const layout = async ({ children, params }) => {
   const { id } = await params;
@@ -34,12 +35,15 @@ const layout = async ({ children, params }) => {
               id: true,
               judul: true,
               status: true,
+              createdAt: true,
             },
           },
         },
       },
     },
   });
+
+  if (!report) return notFound();
 
   return (
     <div className="flex  overflow-hidden gap-2">

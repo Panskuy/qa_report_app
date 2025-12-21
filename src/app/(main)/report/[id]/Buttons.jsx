@@ -4,9 +4,11 @@ import React, { useState } from "react";
 import {
   approveReportByQA,
   assignPICToReport,
+  editDeskripsiQA,
   updateReportStatus,
 } from "./action";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 export const ButtonUpdateStatus = ({ status, reportId }) => {
   const [currentStatus, setCurrentStatus] = useState(status);
@@ -226,109 +228,231 @@ export const ButtonAssignPIC = ({ reportId, currentPIC }) => {
 };
 
 export const ButtonApproveQA = ({ reportId, currentStatus }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [catatan, setCatatan] = useState("");
 
-  const handleAction = async (type) => {
-    setIsLoading(true);
+  const handleAction = async (status) => {
+    if (!catatan.trim()) {
+      alert("Catatan wajib diisi");
+      return;
+    }
+
+    setLoading(true);
 
     try {
-      const result = await approveReportByQA(reportId, type, catatan);
+      const result = await approveReportByQA(reportId, status, catatan);
 
-      if (result.success) {
-        window.location.reload();
-      } else {
-        alert("Gagal melakukan aksi: " + result.error);
+      if (!result.success) {
+        alert(result.error);
+        return;
       }
+
+      window.location.reload(); // bisa diganti revalidate
     } catch (error) {
-      console.error("Error:", error);
-      alert("Terjadi kesalahan saat proses");
+      console.error(error);
+      alert("Terjadi kesalahan");
     } finally {
-      setIsLoading(false);
-      setIsOpen(false);
+      setLoading(false);
+      setOpen(false);
     }
   };
 
+  /* =====================
+     STATUS CLOSED / APPROVED
+  ====================== */
   if (currentStatus === "Closed") {
     return (
-      <div className="flex items-center gap-2 px-3 py-2 bg-green-100 border border-green-300 rounded-md shadow-sm">
-        <svg
-          className="w-5 h-5 text-green-700"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-          aria-hidden="true"
-        >
+      <span className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold text-green-700 bg-green-100 border border-green-300 rounded-md">
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
           <path
             fillRule="evenodd"
             d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
             clipRule="evenodd"
           />
         </svg>
-        <span className="text-sm font-semibold text-green-800">Approved</span>
-      </div>
+        Approved
+      </span>
     );
   }
 
+  /* =====================
+     ACTION BUTTON
+  ====================== */
   return (
     <>
       <button
-        className="inline-flex items-center justify-center gap-2 px-5 py-2 bg-blue-700 text-white text-sm font-semibold rounded-md shadow-md hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        onClick={() => setIsOpen(true)}
-        disabled={isLoading}
-        aria-haspopup="dialog"
-        aria-expanded={isOpen}
+        onClick={() => setOpen(true)}
+        disabled={loading}
+        className="
+          inline-flex items-center justify-center
+          px-5 py-2 text-sm font-semibold
+          bg-blue-700 text-white rounded-md
+          hover:bg-blue-800 transition
+          disabled:opacity-50 disabled:cursor-not-allowed
+        "
       >
-        Approval
+        Approval QA
       </button>
 
-      {isOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="dialog-title"
-          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4"
-        >
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-8 space-y-6">
-            <h2
-              id="dialog-title"
-              className="text-xl font-semibold text-gray-900 text-center"
-            >
-              Approv?
+      {/* =====================
+          MODAL
+      ====================== */}
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white w-full max-w-md rounded-lg shadow-xl p-6 space-y-5 animate-fadeIn">
+            <h2 className="text-lg font-semibold text-slate-800 text-center">
+              Konfirmasi Approval QA
             </h2>
 
-            <div className="flex justify-center gap-6">
+            <textarea
+              value={catatan}
+              onChange={(e) => setCatatan(e.target.value)}
+              placeholder="Tambahkan catatan untuk developer..."
+              rows={4}
+              className="
+                w-full border border-slate-300 rounded-md p-3 text-sm
+                focus:ring-2 focus:ring-slate-800/20
+                resize-none
+              "
+            />
+
+            <div className="flex gap-3">
               <button
                 onClick={() => handleAction("Approved")}
-                disabled={isLoading}
-                className="flex-1 px-6 py-3 bg-green-600 text-white rounded-md shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                disabled={loading}
+                className="
+                  flex-1 px-4 py-2 text-sm font-semibold
+                  bg-green-600 text-white rounded-md
+                  hover:bg-green-700 transition
+                  disabled:opacity-50
+                "
               >
-                {isLoading ? "Processing..." : "Approve"}
+                {loading ? "Processing..." : "Approve"}
               </button>
+
               <button
                 onClick={() => handleAction("Pending")}
-                disabled={isLoading}
-                className="flex-1 px-6 py-3 bg-red-600 text-white rounded-md shadow hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                disabled={loading}
+                className="
+                  flex-1 px-4 py-2 text-sm font-semibold
+                  bg-red-600 text-white rounded-md
+                  hover:bg-red-700 transition
+                  disabled:opacity-50
+                "
               >
-                {isLoading ? "Processing..." : "Kembalikan ke PIC"}
+                {loading ? "Processing..." : "Kembalikan ke PIC"}
               </button>
             </div>
 
+            <button
+              onClick={() => setOpen(false)}
+              disabled={loading}
+              className="
+                w-full px-4 py-2 text-sm
+                border border-slate-300 rounded-md
+                hover:bg-slate-100 transition
+                disabled:opacity-50
+              "
+            >
+              Batal
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export const ButtonEditDeskripsi = ({ reportId, initialValue = "" }) => {
+  const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [deskripsi, setDeskripsi] = useState(initialValue);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const openModal = () => {
+    setMounted(true);
+    requestAnimationFrame(() => setOpen(true));
+  };
+
+  const closeModal = () => {
+    setOpen(false);
+    setTimeout(() => setMounted(false), 200);
+  };
+
+  const handleSubmit = async () => {
+    setLoading(true);
+
+    const result = await editDeskripsiQA(reportId, deskripsi);
+
+    if (!result.success) {
+      closeModal();
+      toast.error(result.error);
+      setLoading(false);
+      router.refresh();
+    } else {
+      closeModal();
+    }
+
+    setLoading(false);
+  };
+
+  return (
+    <>
+      {/* BUTTON */}
+      <button
+        onClick={openModal}
+        className="px-3 py-1.5 text-xs font-semibold
+        border border-slate-300 rounded-md
+        text-slate-700 hover:bg-slate-100 transition"
+      >
+        Edit Deskripsi
+      </button>
+
+      {/* MODAL */}
+      {mounted && (
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center
+          bg-black/40 transition-opacity duration-200
+          ${open ? "opacity-100" : "opacity-0"}`}
+        >
+          <div
+            className={`bg-white w-full max-w-lg rounded-lg shadow-lg p-6
+            transform transition-all duration-200
+            ${open ? "scale-100 opacity-100" : "scale-95 opacity-0"}`}
+          >
+            <h2 className="text-lg font-semibold text-slate-800 mb-3">
+              Edit Deskripsi
+            </h2>
+
             <textarea
-              type="text"
-              placeholder="Masukan catatan"
-              value={catatan}
-              onChange={(e) => setCatatan(e.target.value)}
-              className="w-full min-h-30 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1 resize-none"
+              value={deskripsi}
+              onChange={(e) => setDeskripsi(e.target.value)}
+              rows={5}
+              className="w-full border border-slate-300 rounded-md p-3 text-sm
+              focus:ring-2 focus:ring-slate-800/20"
             />
 
-            <button
-              onClick={() => setIsOpen(false)}
-              disabled={isLoading}
-              className="w-full px-6 py-3 text-gray-700 font-semibold rounded-md border border-gray-300 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed transition"
-            >
-              Tutup
-            </button>
+            <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
+              <button
+                onClick={closeModal}
+                disabled={loading}
+                className="px-4 py-2 text-sm border border-slate-300 rounded-md hover:bg-slate-100"
+              >
+                Batal
+              </button>
+
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="px-4 py-2 text-sm font-semibold
+                bg-slate-800 text-white rounded-md
+                hover:bg-slate-900 disabled:opacity-50"
+              >
+                {loading ? "Menyimpan..." : "Simpan"}
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -6,10 +6,12 @@ import Image from "next/image";
 import {
   ButtonApproveQA,
   ButtonAssignPIC,
+  ButtonEditDeskripsi,
   ButtonUpdateStatus,
 } from "./Buttons";
 import CatatanPerbaikan from "./CatatanPerbaikan";
 import KomponenTanggal from "../../../../components/KomponenTanggal";
+import { notFound } from "next/navigation";
 
 const statusStyle = (status) => {
   switch (status) {
@@ -76,7 +78,7 @@ const page = async ({ params }) => {
   const currentUser = await getCurrentUser();
 
   if (!report) {
-    return <div className="p-8 text-slate-600">Report tidak ditemukan</div>;
+    return notFound();
   }
 
   // Check apakah current user adalah PIC
@@ -124,6 +126,10 @@ const page = async ({ params }) => {
                 {report.team?.namaTim}
               </span>
             </p>
+            <p>
+              No:{" "}
+              <span className="font-medium text-slate-700">{report.kode}</span>
+            </p>
           </div>
         </header>
 
@@ -146,9 +152,22 @@ const page = async ({ params }) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full ">
         <div className="lg:col-span-2 bg-white h-fit space-y-6">
           <div className="border border-slate-200 rounded-lg p-6">
-            <h2 className="text-sm font-semibold text-slate-800 mb-3 uppercase ">
-              Deskripsi Masalah
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-slate-800 mb-3 uppercase ">
+                Deskripsi Masalah
+              </h2>
+
+              {currentUser.role === "QA" &&
+                report.assignedToId === null &&
+                report.status === "Open" &&
+                report.createdById === currentUser.id && (
+                  <ButtonEditDeskripsi
+                    initialValue={report.deskripsi}
+                    reportId={report.id}
+                  />
+                )}
+            </div>
+
             <p
               className={`text-sm text-slate-700 whitespace-pre-line leading-relaxed ${
                 report.catatan_qa !== null ? "min-h-40" : "min-h-160"
@@ -307,7 +326,6 @@ const page = async ({ params }) => {
             <h2 className="text-sm font-semibold text-slate-800 mb-3 uppercase">
               Status Pengerjaan
             </h2>
-
             <div className="flex items-start gap-3">
               {/* Left Side - Status Pengerjaan */}
               <div className="flex-1">
@@ -336,14 +354,7 @@ const page = async ({ params }) => {
                       </div>
                     )}
 
-                    {report.tanggal_approval_qa !== null ? (
-                      <div className="text-xs text-slate-500 pt-2 border-t border-slate-200">
-                        <p className="">
-                          Di Approv pada tanggal:{" "}
-                          <KomponenTanggal value={report.tanggal_approval_qa} />
-                        </p>
-                      </div>
-                    ) : (
+                    {report.tanggal_approval_qa !== null ? null : (
                       <p className="text-xs text-slate-500">
                         Anda dapat mengubah status pengerjaan
                       </p>
@@ -362,7 +373,6 @@ const page = async ({ params }) => {
                   </div>
                 )}
               </div>
-
               {/* Right Side - QA Approval */}
               <div className="">
                 {report.status === "Closed" &&
@@ -398,6 +408,14 @@ const page = async ({ params }) => {
                 ) : null}
               </div>
             </div>
+            {report.tanggal_approval_qa !== null && (
+              <div className="text-xs text-slate-500 pt-2 border-t border-slate-200">
+                <p className="">
+                  Di Approv pada tanggal:{" "}
+                  <KomponenTanggal value={report.tanggal_approval_qa} />
+                </p>
+              </div>
+            )}
           </section>
 
           {/* Perbaikan */}

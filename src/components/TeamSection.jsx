@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { DeleteTeamButton } from "./Buttons";
 
 /* ================== Helpers ================== */
 const formatDate = (date) =>
@@ -40,32 +41,40 @@ const severityStyle = (severity) => {
 };
 
 /* ================== Component ================== */
-const TeamSection = ({ team }) => {
+const TeamSection = ({ team, user }) => {
+  console.log(team.id);
+
   const [open, setOpen] = useState(false);
 
   return (
     <div className="bg-white border border-slate-200 rounded-lg mb-6">
       {/* Team Header */}
-      <button
-        onClick={() => setOpen((prev) => !prev)}
-        className="w-full flex justify-between items-center px-6 py-4 border-b border-slate-200 hover:bg-slate-50 transition"
-      >
-        {/* 🔗 Team Link */}
-        <Link
-          href={`/team/${team.id}`}
-          onClick={(e) => e.stopPropagation()}
-          className="font-medium text-slate-800 hover:underline"
+      <div className="flex items-center justify-center mr-6">
+        <button
+          onClick={() => setOpen((prev) => !prev)}
+          className="w-full flex justify-between items-center px-6 py-4 border-b border-slate-200 hover:bg-slate-50 transition"
         >
-          Team: {team.namaTim}
-        </Link>
+          {/* 🔗 Team Link */}
+          <Link
+            href={`/team/${team.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="font-medium text-slate-800 hover:underline"
+          >
+            Team: {team.namaTim}
+          </Link>
 
-        <div className="flex items-center gap-4 text-sm">
-          <span className="text-slate-600">
-            Bug: <strong>{team._count.reports}</strong>
-          </span>
-          <span className="text-slate-400">{open ? "▲" : "▼"}</span>
-        </div>
-      </button>
+          <div>
+            <div className="flex items-center gap-4 text-sm">
+              <span className="text-slate-600">
+                Bug: <strong>{team._count.reports}</strong>
+              </span>
+              <span className="text-slate-400">{open ? "▲" : "▼"}</span>
+            </div>
+          </div>
+        </button>
+
+        {user.role === "ADMIN" && <DeleteTeamButton team_id={team.id} />}
+      </div>
 
       {/* Lazy Loaded Reports */}
       {open && (

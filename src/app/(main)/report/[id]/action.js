@@ -1,5 +1,6 @@
 "use server";
 
+import { auth } from "@/app/libs/auth";
 import prisma from "@/app/libs/prisma";
 import { revalidatePath } from "next/cache";
 
@@ -121,10 +122,30 @@ export async function assignPICToReport(reportId, currentPIC) {
 
 export async function updateCatatanPerbaikan(reportId, catatan) {
   try {
-    const updatedReport = await prisma.report.update({
-      where: {
-        id: reportId,
+    // 🔎 Ambil status approval QA
+    const report = await prisma.report.findUnique({
+      where: { id: reportId },
+      select: {
+        approval_status: true,
       },
+    });
+
+    if (!report) {
+      return {
+        success: false,
+        error: "Report tidak ditemukan",
+      };
+    }
+    if (report.approval_status === "Approved") {
+      return {
+        success: false,
+        error:
+          "Catatan perbaikan tidak dapat diubah karena report sudah di-approve QA",
+      };
+    }
+
+    const updatedReport = await prisma.report.update({
+      where: { id: reportId },
       data: {
         Perbaikan: catatan,
         tanggal_perbaikan: catatan ? new Date() : null,
@@ -142,7 +163,7 @@ export async function updateCatatanPerbaikan(reportId, catatan) {
     console.error("Error updating catatan perbaikan:", error);
     return {
       success: false,
-      error: error.message,
+      error: "Terjadi kesalahan server",
     };
   }
 }
@@ -167,5 +188,57 @@ export async function approveReportByQA(reportId, newApprovalStatus, catatan) {
   } catch (error) {
     console.error("Error approving report:", error);
     return { success: false, error: error.message };
+  }
+}
+
+export async function editDeskripsiQA(reportId, newValue) {
+  try {
+    const session = await auth();
+    const user = session?.user;
+
+    if (!user) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const report = await prisma.report.findUnique({
+      where: { id: reportId },
+      select: {
+        createdById: true,
+        assignedToId: true,
+      },
+    });
+
+    if (!report) {
+      return { success: false, error: "Report tidak ditemukan" };
+    }
+
+    // 🔒 VALIDASI ROLE & OWNER
+    if (user.role !== "QA" || report.createdById !== user.id) {
+      revalidatePath(`/reports/${reportId}`);
+      return { success: false, error: "Akses ditolak" };
+    }
+
+    if (report.assignedToId !== null) {
+      return {
+        success: false,
+        error:
+          "Tidak dapat mengubah Deskripsi, karena Report ini sudah di ambil Oleh Developer",
+      };
+    }
+
+    await prisma.report.update({
+      where: { id: reportId },
+      data: {
+        deskripsi: newValue,
+      },
+    });
+
+    revalidatePath("/reports");
+    revalidatePath(`/reports/${reportId}`);
+
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Server error" };
   }
 }

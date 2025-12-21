@@ -3,6 +3,7 @@ import React from "react";
 import LogoutButton from "./LogoutButton";
 import Link from "next/link";
 import FullscreenButton from "./FullScreenButton";
+import SearchBarHomePage from "./searchBarHomePage";
 
 const Navbar = async () => {
   const session = await auth();
@@ -15,6 +16,7 @@ const Navbar = async () => {
         </Link>
 
         <div className="flex items-center gap-3">
+          <SearchBarHomePage />
           {session?.user && <p className="text-sm mt-1">{session.user.name}</p>}
 
           {session && <LogoutButton />}
