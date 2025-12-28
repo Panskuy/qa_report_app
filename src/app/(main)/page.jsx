@@ -10,7 +10,8 @@ import SearchBarHomePage from "@/components/searchBarHomePage";
 
 const page = async ({ searchParams }) => {
   const session = await auth();
-  const keyword = searchParams?.app || "";
+  const apps = await await searchParams;
+  const keyword = apps?.app || "";
 
   const applications = await prisma.application.findMany({
     where: keyword

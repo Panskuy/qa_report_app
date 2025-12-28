@@ -8,7 +8,12 @@ const layout = async ({ children }) => {
   if (session) {
     redirect("/");
   }
-  return <div>{children}</div>;
+
+  return (
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="w-full max-w-md px-4">{children}</div>
+    </div>
+  );
 };
 
 export default layout;

@@ -37,11 +37,10 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-900 rounded-2xl mb-4">
+        <div className="text-center mb-8 bg-white p-4 rounded-xl">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-900 rounded-2xl mb-2">
             <svg
               className="w-8 h-8 text-white"
               fill="none"
@@ -56,20 +55,19 @@ export default function SignInPage() {
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Welcome Back</h1>
+          <h1 className="text-2xl font-bold text-slate-900">QA Report</h1>
           <p className="text-sm text-slate-600 mt-2">
-            Sign in to your account to continue
+            Silahkan Login Terlebih Dahulu
           </p>
         </div>
 
         {/* Form Card */}
         <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Error Alert */}
             {error && (
               <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 animate-shake">
                 <svg
-                  className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"
+                  className="w-5 h-5 text-red-600 mt-0.5"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -85,7 +83,6 @@ export default function SignInPage() {
               </div>
             )}
 
-            {/* Email Input */}
             <div>
               <label
                 htmlFor="email"
@@ -122,7 +119,6 @@ export default function SignInPage() {
               </div>
             </div>
 
-            {/* Password Input */}
             <div>
               <label
                 htmlFor="password"
@@ -159,7 +155,6 @@ export default function SignInPage() {
               </div>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
@@ -194,17 +189,6 @@ export default function SignInPage() {
             </button>
           </form>
         </div>
-
-        {/* Footer */}
-        <p className="text-center text-sm text-slate-600 mt-6">
-          Don't have an account?{" "}
-          <a
-            href="/signup"
-            className="font-semibold text-slate-900 hover:underline"
-          >
-            Sign Up
-          </a>
-        </p>
       </div>
     </div>
   );
